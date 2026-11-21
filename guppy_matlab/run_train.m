@@ -22,7 +22,7 @@ nTr = size(D.train.ids, 1);
 nEv = size(D.eval.ids, 1);
 fprintf('train %d / eval %d samples\n', nTr, nEv);
 
-P  = guppy.initParams(cfg);
+P  = guppy.initParams(cfg, cfg.dtype);
 st = struct();
 fprintf('params %d  (%.2f M)\n', guppy.countParams(P), guppy.countParams(P)/1e6);
 
@@ -67,16 +67,21 @@ for k = 1:nRun
         fprintf('  eval @%d : %.4f\n', k, el);
         if el < bestEval
             bestEval = el;
-            save(fullfile(ckDir, [tag '_best.mat']), 'P', 'cfg', 'k', 'el', '-v7.3');
+            rngState = rng;
+            save(fullfile(ckDir, [tag '_best.mat']), 'P', 'st', 'cfg', 'k', 'el', ...
+                 'perm', 'ptr', 'rngState', '-v7.3');
         end
     end
     if mod(k, cfg.saveEvery) == 0
-        save(fullfile(ckDir, sprintf('%s_%05d.mat', tag, k)), 'P', 'st', 'cfg', 'k', '-v7.3');
+        rngState = rng;
+        save(fullfile(ckDir, sprintf('%s_%05d.mat', tag, k)), 'P', 'st', 'cfg', 'k', ...
+             'perm', 'ptr', 'rngState', '-v7.3');
         fprintf('  checkpoint %s_%05d.mat\n', tag, k);
     end
 end
 
-save(fullfile(ckDir, [tag '_final.mat']), 'P', 'st', 'cfg', '-v7.3');
+rngState = rng;
+save(fullfile(ckDir, [tag '_final.mat']), 'P', 'st', 'cfg', 'k', 'perm', 'ptr', 'rngState', '-v7.3');
 fprintf('DONE %s in %.1f min, best eval %.4f\n', tag, toc(t0)/60, bestEval);
 end
 

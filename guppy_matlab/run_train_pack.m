@@ -17,7 +17,7 @@ cfg = guppy.defaultConfig('steps', nSteps, 'dropout', dropout);
 cfg.warmup = max(20, round(0.02 * nSteps));      % same 2% warmup as the baseline
 
 maxNumCompThreads(8);
-rand('seed', cfg.seed); randn('seed', cfg.seed);
+rng(cfg.seed);
 P = guppy.initParams(cfg, cfg.dtype);
 st = struct(); st.t = 0;
 
@@ -69,11 +69,14 @@ for k = 1:nSteps
         fprintf('  eval @%d (%.2f M tokens) : %.4f\n', k, k * cfg.batch * W.T / 1e6, el);
         if el < bestEval
             bestEval = el;
-            save(fullfile(ckDir, [tag '_best.mat']), 'P', 'cfg', 'k', 'el', '-v7.3');
+            rngState = rng;
+            save(fullfile(ckDir, [tag '_best.mat']), 'P', 'st', 'cfg', 'k', 'el', ...
+                 'ord', 'ptr', 'rngState', '-v7.3');
         end
     end
 end
-save(fullfile(ckDir, [tag '_final.mat']), 'P', 'st', 'cfg', '-v7.3');
+rngState = rng;
+save(fullfile(ckDir, [tag '_final.mat']), 'P', 'st', 'cfg', 'k', 'ord', 'ptr', 'rngState', '-v7.3');
 fprintf('DONE %s at %d steps (%.2f M tokens), best eval %.4f, %.1f min\n', ...
     tag, nSteps, nSteps * cfg.batch * W.T / 1e6, bestEval, toc(t0)/60);
 end

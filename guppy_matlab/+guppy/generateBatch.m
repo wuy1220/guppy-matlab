@@ -17,20 +17,39 @@ if numel(p) + maxNew > cfg.Tmax
     error('guppy:ctxOverflow', 'prompt %d + %d new tokens > %d', numel(p), maxNew, cfg.Tmax);
 end
 
+if maxNew <= 0
+    ids = zeros(0, B);
+    logits = [];
+    return
+end
+
+if isfield(cfg, 'eosId'), eos = cfg.eosId; else, eos = 2; end
+
 tok = repmat(p, 1, B);
 [lg, KV] = guppy.forwardBatch(P, cfg, tok, []);
 ids = zeros(maxNew, B);
+finished = false(1, B);
 
 nxt = zeros(1, B);
 for b = 1:B
     nxt(b) = draw(double(lg(b * size(tok,1), :)) / temp, topk);
+    finished(b) = nxt(b) == eos;
 end
 ids(1, :) = nxt;
 
 for it = 2:maxNew
+    if all(finished)
+        ids(it:end, :) = eos;
+        break
+    end
     [lg, KV] = guppy.forwardBatch(P, cfg, nxt, KV);
     for b = 1:B
-        nxt(b) = draw(double(lg(b, :)) / temp, topk);
+        if finished(b)
+            nxt(b) = eos;
+        else
+            nxt(b) = draw(double(lg(b, :)) / temp, topk);
+            finished(b) = nxt(b) == eos;
+        end
     end
     ids(it, :) = nxt;
 end

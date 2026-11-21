@@ -110,15 +110,16 @@ function maskV = causalMask(T, cfg, dtype, cache)
 %CAUSALMASK [T x T x 1] additive mask, -1e9 strictly above the diagonal.
 %   The same matrix is rebuilt on every call in the naive version -- only
 %   0.01 ms, but it is one allocation per step that buys nothing, so it is
-%   kept alive across calls keyed on (T, class).
+%   kept alive across calls keyed on (T, class, mask value).
 persistent cached
+maskNeg = cast(cfg.maskNeg, dtype);
 if ~cache
-    maskV = reshape(cast(triu(ones(T, T), 1), dtype) * cast(cfg.maskNeg, dtype), [T T 1]);
+    maskV = reshape(cast(triu(ones(T, T), 1), dtype) * maskNeg, [T T 1]);
     return
 end
-if isempty(cached) || cached.T ~= T || ~strcmp(cached.cls, dtype)
-    cached = struct('T', T, 'cls', dtype, ...
-        'm', reshape(cast(triu(ones(T, T), 1), dtype) * cast(cfg.maskNeg, dtype), [T T 1]));
+if isempty(cached) || cached.T ~= T || ~strcmp(cached.cls, dtype) || cached.maskNeg ~= maskNeg
+    cached = struct('T', T, 'cls', dtype, 'maskNeg', maskNeg, ...
+        'm', reshape(cast(triu(ones(T, T), 1), dtype) * maskNeg, [T T 1]));
 end
 maskV = cached.m;
 end

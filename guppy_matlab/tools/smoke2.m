@@ -14,7 +14,7 @@ ids = randi([0 60], T, B);
 y   = randi([0 60], T, B);  y(1:2, :) = 0;
 
 f = @(Pm) guppy.forward(Pm, cfg, ids, y, false);
-[loss, C] = guppy.forward(P, cfg, ids, y, false);
+[loss, C] = guppy.forward(P, cfg, ids, y, false, false, true);
 G = guppy.backward(P, C, cfg);
 fprintf('loss %.6f   |G| %.6f\n\n', loss, guppy.gradNorm(G));
 

@@ -1,7 +1,7 @@
 function run_train_resume(ckpt, tag, nMax)
 %RUN_TRAIN_RESUME Continue a run from a checkpoint, keeping the same LR schedule.
-%   The checkpoint stores the Adam moments and the step counter, so resuming
-%   is bit-identical to never having stopped (apart from the batch order).
+%   Current checkpoints store Adam moments, the RNG state and the batch cursor,
+%   so resuming follows the same training stream as an uninterrupted run.
 %
 %   nMax lets a short dry run reuse exactly this code path, which is the only
 %   way to be sure the long run will behave.
@@ -14,10 +14,17 @@ if nargin < 2 || isempty(tag),  tag  = 'full3';      end
 
 root = fileparts(mfilename('fullpath'));
 S = load(fullfile(root, 'checkpoints', [ckpt '.mat']));
-P = S.P; st = S.st; cfg = S.cfg;
+P = S.P; cfg = S.cfg;
 k0 = 0;
 if isfield(S, 'k'), k0 = S.k; end
-if ~isfield(st, 't'), st.t = k0; end
+if isfield(S, 'st')
+    st = S.st;
+    if ~isfield(st, 't'), st.t = k0; end
+else
+    % Older best checkpoints omitted Adam moments. Preserve their step number
+    % while starting a fresh optimizer state instead of silently resetting LR.
+    st = struct('m', guppy.likeParams(P), 'v', guppy.likeParams(P), 't', k0);
+end
 if nargin < 3 || isempty(nMax), nMax = cfg.steps; end
 
 % 8 physical cores: 16 threads measured *slower* than 8 (bench4, section 3)
@@ -31,6 +38,7 @@ if ~exist(ckDir, 'dir'), mkdir(ckDir); end
 D = data.loadData(cfg);
 nTr = size(D.train.ids, 1);
 nEv = size(D.eval.ids, 1);
+if isfield(S, 'rngState'), rng(S.rngState); end
 fprintf('resume from step %d, target %d, params %d, threads %d\n', ...
     st.t, nMax, guppy.countParams(P), maxNumCompThreads);
 fprintf('checkpoints -> %s\n', ckDir);
@@ -38,7 +46,11 @@ fprintf('checkpoints -> %s\n', ckDir);
 csvPath = fullfile(logDir, [tag '.csv']);
 fid = fopen(csvPath, 'w'); fprintf(fid, 'step,loss,gnorm,lr,sec\n'); fclose(fid);
 
-perm = randperm(nTr); ptr = 1;
+if isfield(S, 'perm') && isfield(S, 'ptr')
+    perm = S.perm; ptr = S.ptr;
+else
+    perm = randperm(nTr); ptr = 1;
+end
 t0 = tic; bestEval = inf;
 kStart = st.t;
 
@@ -65,14 +77,19 @@ for k = (st.t + 1):nMax
         fprintf('  eval @%d : %.4f\n', k, el);
         if el < bestEval
             bestEval = el;
-            save(fullfile(ckDir, [tag '_best.mat']), 'P', 'cfg', 'k', 'el', '-v7.3');
+            rngState = rng;
+            save(fullfile(ckDir, [tag '_best.mat']), 'P', 'st', 'cfg', 'k', 'el', ...
+                 'perm', 'ptr', 'rngState', '-v7.3');
         end
     end
     if mod(k, cfg.saveEvery) == 0
-        save(fullfile(ckDir, sprintf('%s_%05d.mat', tag, k)), 'P', 'st', 'cfg', 'k', '-v7.3');
+        rngState = rng;
+        save(fullfile(ckDir, sprintf('%s_%05d.mat', tag, k)), 'P', 'st', 'cfg', 'k', ...
+             'perm', 'ptr', 'rngState', '-v7.3');
     end
 end
-save(fullfile(ckDir, [tag '_final.mat']), 'P', 'st', 'cfg', '-v7.3');
+rngState = rng;
+save(fullfile(ckDir, [tag '_final.mat']), 'P', 'st', 'cfg', 'k', 'perm', 'ptr', 'rngState', '-v7.3');
 fprintf('DONE resume %s at %d (best eval %.4f), %.1f min\n', tag, nMax, bestEval, toc(t0)/60);
 end
 

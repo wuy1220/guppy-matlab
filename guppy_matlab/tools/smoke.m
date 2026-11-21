@@ -21,7 +21,7 @@ ids = randi([0 60], T, B);
 y   = randi([0 60], T, B);
 y(1:2, :) = 0;                      % simulate right padding
 
-[loss, C] = guppy.forward(P, cfg, ids, y, false);
+[loss, C] = guppy.forward(P, cfg, ids, y, false, false, true);
 G = guppy.backward(P, C, cfg);
 fprintf('loss             : %.6f   (nValid %d, expected %d)\n', loss, C.nValid, sum(y(:) ~= 0));
 fprintf('|G| global norm  : %.6f\n', guppy.gradNorm(G));

@@ -10,6 +10,11 @@ if nargin < 6 || isempty(topk),   topk   = 50;   end
 ids = promptIds(:);
 if isfield(cfg, 'eosId'), eos = cfg.eosId; else, eos = 2; end   % <|im_end|>
 
+if maxNew <= 0
+    texts = ids;
+    return
+end
+
 % The cache keeps absolute positions and has no sliding window. Rather than
 % silently changing what the sampler sees, hand the job back to the stateless
 % version whenever the prompt could overrun the context.
