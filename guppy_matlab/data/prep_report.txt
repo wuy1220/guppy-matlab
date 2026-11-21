@@ -1,0 +1,13 @@
+{
+  "vocab_size": 2418,
+  "merges": 2352,
+  "train_rows": 54000,
+  "eval_rows": 3000,
+  "len_mean": 27.43,
+  "len_p50": 27.0,
+  "len_p95": 36,
+  "len_max": 59,
+  "truncated": 0,
+  "total_tokens": 1481011,
+  "elapsed_s": 2.0
+}

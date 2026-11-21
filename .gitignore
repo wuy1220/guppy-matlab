@@ -1,0 +1,38 @@
+# ---- 训练产物：体积大，且可由代码重新生成 ----
+checkpoints/
+*.mat
+*.u16
+*.parquet
+!guppy_matlab/data/train.parquet
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.whl
+
+# ---- 临时文件与运行日志 ----
+_scratch/
+.workbuddy/
+guppy_matlab/data/_shots/
+guppy_matlab/agent/
+guppy_matlab/backup_r4/
+guppy_matlab/logs/figs.txt
+guppy_matlab/data/idx_*.html
+/logs/
+
+# ---- 通过 GUI 驱动 MATLAB 的辅助脚本（与本机窗口标题、进程号绑定）----
+guppy_matlab/tools/click_enter.py
+guppy_matlab/tools/ctrl_c.py
+guppy_matlab/tools/focus_type.py
+guppy_matlab/tools/grab_window.py
+guppy_matlab/tools/hit_enter.py
+guppy_matlab/tools/paste_cmd.py
+guppy_matlab/tools/paste_to_matlab.py
+guppy_matlab/tools/submit_line.py
+guppy_matlab/tools/cmd_*.txt
+
+# ---- 报告中间产物 ----
+report/_*
+report/out/_*
+report/out/p[0-9].png
+report/out/backup_before_infer.docx

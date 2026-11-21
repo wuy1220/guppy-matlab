@@ -1,0 +1,14 @@
+fields: CompleteName FunctionName FileName Type Children Parents ExecutedLines IsRecursive TotalRecursiveTime PartialData NumCalls TotalTime
+
+function                                       total_ms    calls
+agent_start                                      463.42        1
+r_prof3                                          463.31        1
+forward                                          428.54      100
+attentionFwd                                      40.16      600
+layerNormFwd                                      29.68     1300
+mean                                              19.07     2600
+attentionFwd>toHeads                              11.52     1800
+attentionFwd>fromHeads                             5.94      600
+mean>mysize                                        4.52     2600
+flags                                              3.37      100
+forward>causalMask                                 2.58      100

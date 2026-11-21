@@ -1,0 +1,12 @@
+prefill_maxdiff,4.292e-06
+step_maxdiff_max,1.001e-05
+step_maxdiff_median,7.510e-06
+same_stream,1
+n_tokens,28,28
+gen40_stateless,0.050
+gen40_cached,0.036
+speedup,1.39
+train_loss,7.8100
+train_gnorm,7.6955
+all_prompts,0.81
+n_prompts,10

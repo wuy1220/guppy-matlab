@@ -1,0 +1,39 @@
+<|im_start|>user
+hi guppy<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+are you hungry<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+do you like bubbles<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+what is the meaning of life<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+tell me a joke<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+do you love me<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+it is raining outside<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+the cat is looking at you<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+goodnight guppy<|im_end|>
+<|im_start|>assistant
+
+<|im_start|>user
+are you scared of the filter<|im_end|>
+<|im_start|>assistant

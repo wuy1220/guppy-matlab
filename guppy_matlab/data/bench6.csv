@@ -1,0 +1,6 @@
+1	A0 double; fixed T=128	2.132502
+2	A1 single; fixed T=128	1.062330
+3	A2 single; dynamic T	0.417358
+4	A3 + fused kernels	0.387993
+5	A4 + dropout off	0.349495
+6	A5 + lean AdamW	0.354319

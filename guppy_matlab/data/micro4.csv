@@ -1,0 +1,11 @@
+op,n,ms
+pagemtimes_QK,6,0.0023
+pagemtimes_PV,6,0.0040
+flat_matmul,1,0.0040
+struct20,1,0.0186
+cellidx6,1,0.0022
+mv_1152,1,0.0318
+mv_384,1,0.0089
+mv_768,1,0.0214
+mv_2418,1,0.0841
+budget,0,0.737
