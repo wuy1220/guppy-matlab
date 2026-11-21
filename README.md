@@ -16,7 +16,7 @@ Statistics：`dlarray`、`dlgradient`、`trainingOptions`、`softmax` 全部不�
 | 10 000 步训练 | 5.9 h → 1.0 h |
 | 训练结果 | 留出损失 0.3787，困惑度 **1.46**；训练与留出损失之差 < 0.01 |
 | 梯度校验 | 中心差分对照：最好 3.2e−9，最差 2.7e−7（相对误差） |
-| 推理 | 单 token 3.56 ms → KV 缓存 4.6 ms → 批量解码 2 486 tokens/s（7.1×） |
+| 推理 | 单 token 前向 3.56 ms；第 110 个 token 由 12.4 ms 降至 4.6 ms（KV 缓存）；批量解码 2 486 tokens/s（7.1×） |
 
 ![优化阶梯与生成效果](guppy_matlab/figures/fig1_cover.png)
 
@@ -33,7 +33,7 @@ Statistics：`dlarray`、`dlgradient`、`trainingOptions`、`softmax` 全部不�
 1. **可行性**：手写反向传播与 AdamW 足以把 8 M 参数的模型训练到可用状态。正确性由两级证据确认——
    逐个算子对照中心差分（表 3），以及单批过拟合；两者都比损失曲线更能说明问题。
 2. **6.1× 的来源**：精度（double → single，2.01×）、张量形状（按批内最长序列取 T，2.55×）、
-   算子合并（1.08×）、关掉 dropout（1.11×）。没有一项来自"更聪明的算法"。
+   算子合并（1.08×）、关掉 dropout（1.11×）。没有一项来自“更聪明的算法”。
 3. **瓶颈会转移**：GEMM 部分已接近本机 BLAS 上限（1024³ 方阵 509 GFLOPS，模型四种形状 421/345/430/464），
    占单步的 50%；其余 50% 消耗在 LayerNorm、AdamW、梯度裁剪这些逐元素运算上。
 4. **逐元素运算不随线程数扩展**：8 线程下同一数组不同写法的吞吐差 4.0 倍，但改成 1 线程后几乎不变
@@ -71,7 +71,6 @@ run_train()                      % 10 000 步，8 核实测约 1.0 h
 ```matlab
 run_sample('run_final')          % 对 data/prompts.txt 的固定提示集生成
 
-addpath(genpath(pwd));
 bench6()                         % 优化阶梯 + GEMM 上限，约 4 min
 r_bw()                           % 逐元素算子与 STREAM 带宽，约 5 s
 r_kv3(); r_kv4()                 % KV 缓存曲线，约 1.5 min
