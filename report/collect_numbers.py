@@ -141,6 +141,8 @@ train_all = core + mlines("run_*.m")
 allm = train_all + mlines("stage/*.m") + mlines("tools/*.m")
 
 N["author"] = "姓名：＿＿＿＿＿＿　　学号：＿＿＿＿＿＿＿＿　　投入时间：约 24 小时（含两次无人值守训练）"
+N["repo"] = "github.com/wuy1220/guppy-matlab"
+N["repo_url"] = "https://github.com/wuy1220/guppy-matlab"
 
 N["highlights"] = [
     "环境约束：本机 MATLAB R2026b 的 toolbox/ 下仅有 26 个目录，不含 Deep Learning、Parallel、"

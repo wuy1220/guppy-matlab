@@ -15,6 +15,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.shared import Cm, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,6 +46,19 @@ def set_font(run, ascii_font=SERIF, ea_font=SONG, size=10.5, bold=False, color=N
     rFonts.set(qn("w:ascii"), ascii_font)
     rFonts.set(qn("w:hAnsi"), ascii_font)
     rFonts.set(qn("w:eastAsia"), ea_font)
+
+
+def add_hyperlink(paragraph, url, text, size=10.2, color=(0x1F, 0x4E, 0x79)):
+    """Append text as an external hyperlink -- python-docx has no API for this."""
+    r_id = paragraph.part.relate_to(url, RT.HYPERLINK, is_external=True)
+    run = paragraph.add_run(text)
+    set_font(run, SERIF, SONG, size, False, color)
+    run.font.underline = True
+    link = OxmlElement("w:hyperlink")
+    link.set(qn("r:id"), r_id)
+    run._element.addprevious(link)
+    link.append(run._element)
+    return run
 
 
 def shade(el, hex_fill):
@@ -489,9 +503,11 @@ def build():
 
     doc.add_page_break()
     h1(doc, "附录 A  复现清单", space_before=0)
-    para(doc, "超参数只在 +guppy/defaultConfig.m 一处定义，训练、基准与出图读取同一份 cfg，"
-              "因此文中所有数字对应同一套配置。",
-         size=10.2, indent=0.74, space_after=3)
+    p = para(doc, "超参数只在 +guppy/defaultConfig.m 一处定义，训练、基准与出图读取同一份 cfg，"
+                  "因此文中所有数字对应同一套配置。代码、实测 CSV 与本文见 ",
+             size=10.2, indent=0.74, space_after=3)
+    add_hyperlink(p, NUM["repo_url"], NUM["repo"], size=10.2)
+    set_font(p.add_run("。"), SERIF, SONG, 10.2)
     table(doc,
           ["步骤", "入口", "产物 / 实测耗时"],
           NUM["appendix_rows"],
